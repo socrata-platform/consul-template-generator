@@ -1,0 +1,8 @@
+*.gem
+*.swp
+bin/*
+!bin/consul-template-generator
+.bundle/
+coverage/
+install.sh
+test.rb

@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+require 'optparse' 
+require 'consul/template/generator/cmd'
+
+include Consul::Template::Generator
+
+def verify_opts(opts)
+  !opts[:key].nil? && !opts[:template].nil?
+end
+
+
+options = {}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = <<EOC
+consul-template-generator [options] <command>
+
+Available commands:
+  once    -- Run once and exit.  On success, the rendered template will be inserted into the KV store whether or not it has changed.
+  run     -- Run continually, uploading the rendered template when a change is detected.
+
+Options:
+EOC
+
+  options[:consul] = '127.0.0.1:8500'
+  opts.on('-c HOSTNAME', '--consul HOSTNAME', 'Hostname/port used to connect to consul [default: 127.0.0.1:8500]') do |h|
+    options[:consul] = h
+  end
+
+  options[:template] = nil
+  opts.on('-t TEMPLATE', '--template TEMPLATE', 'Consul-Template ctmpl file to monitor (required)') do |t|
+    options[:template] = t
+  end
+
+  options[:key] = nil
+  opts.on('-k KEY', '--key KEY', 'Key to store rendered template in (required)') do |k|
+    options[:key] = k
+  end
+
+  options[:proxy] = nil
+  opts.on('-p PROXY_URL', '--proxy PROXY_URL', 'Proxy URL if required (e.g. http://proxy.example.com:3128)') do |p|
+    options[:proxy] = p
+  end
+
+  options[:unset_proxy] = false
+  opts.on(nil, '--unset-proxy', "Use if 'http_proxy' is set in your environment, but you don't want to use it...") do |u|
+    options[:unset_proxy] = true
+  end
+
+  options[:log_level] = :info
+  opts.on('-l LOG_LEVEL', '--log-level LOG_LEVEL', "Log level, options are 'debug', 'info', 'error' [default: info]") do |l|
+    options[:log_level] = l.to_sym
+  end
+end
+
+opt_parser.parse!
+
+unless verify_opts(options)
+  STDOUT.puts "Both '--key' and '--template' must be provided"
+  puts opt_parser
+  exit(1)
+end
+
+if options[:unset_proxy]
+  ENV['http_proxy'] = nil
+end
+
+CMD.configure(options[:consul], options[:template], options[:key], options[:log_level], options[:proxy])
+
+ec = 1
+cmd = ARGV[0]
+case cmd
+when 'run'
+    ec = CMD.run
+when 'once'
+    ec = CMD.run_once
+else
+  puts "Unknown command: #{cmd}"
+  puts opt_parser
+end
+
+exit(ec)
