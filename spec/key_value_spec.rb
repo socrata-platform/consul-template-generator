@@ -13,6 +13,7 @@ describe 'Consul::Template::Generator::CTRunner' '#acquire_lock' do
       config.template = 'test-template.ctmpl'
       config.template_key = '/test-template'
       config.consul_host = '127.0.0.1:8500'
+      config.consul_template_binary = 'consul-template'
       config.log_level = :off
     end
   end
@@ -42,6 +43,7 @@ describe 'Consul::Template::Generator::CTRunner' '#acquire_session_lock' do
       config.template = 'test-template.ctmpl'
       config.template_key = '/test-template'
       config.consul_host = '127.0.0.1:8500'
+      config.consul_template_binary = 'consul-template'
       config.log_level = :off
     end
   end
@@ -72,6 +74,7 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
         config.template = 'test-template.ctmpl'
         config.template_key = '/test-template'
         config.consul_host = '127.0.0.1:8500'
+        config.consul_template_binary = 'consul-template'
         config.log_level = :off
       end
     end
@@ -90,6 +93,7 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
         config.template = 'test-template.ctmpl'
         config.template_key = '/test-template-failure'
         config.consul_host = '127.0.0.1:8500'
+        config.consul_template_binary = 'consul-template'
         config.log_level = :off
       end
     end

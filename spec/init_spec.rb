@@ -11,6 +11,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       config.template = 'test-session-template.ctmpl'
       config.template_key = 'test-session-template'
       config.node = 'test-node'
+      config.consul_template_binary = 'consul-template'
     end
   end
 

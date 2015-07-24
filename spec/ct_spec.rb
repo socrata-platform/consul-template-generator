@@ -26,6 +26,7 @@ describe 'Consul::Template::Generator::CTRunner' '#render_template' do
     Consul::Template::Generator.configure do |config|
       config.template = '/etc/test-template.ctmpl'
       config.template_key = '/test-template'
+      config.consul_template_binary = 'consul-template'
     end
   end
 
