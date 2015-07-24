@@ -50,6 +50,16 @@ EOC
   opts.on('-l LOG_LEVEL', '--log-level LOG_LEVEL', "Log level, options are 'debug', 'info', 'error' [default: info]") do |l|
     options[:log_level] = l.to_sym
   end
+
+  options[:cycle_sleep] = 0.5
+  opts.on(nil, '--cycle-sleep CYCLE_SLEEP', "Sleep interval in seconds between each template rendering [default: 0.5]") do |s|
+    options[:cycle_sleep] = s.to_f
+  end
+
+  options[:lock_sleep] = 1.0
+  opts.on(nil, '--lock-sleep LOCK_SLEEP', "Sleep interval in seconds between each attempt to obtain a session lock [default: 1.0]") do |s|
+    options[:cycle_sleep] = s.to_f
+  end
 end
 
 opt_parser.parse!
@@ -70,7 +80,7 @@ ec = 1
 cmd = ARGV[0]
 case cmd
 when 'run'
-    ec = CMD.run
+    ec = CMD.run(options[:cycle_sleep], options[:lock_sleep])
 when 'once'
     ec = CMD.run_once
 else

@@ -15,7 +15,9 @@ module Consul
           end
         end
 
-        def self.run
+        def self.run(cycle_sleep = nil, lock_sleep = nil)
+          cycle_sleep ||= 0.5
+          lock_sleep ||= 1.0
           config = Consul::Template::Generator.config
           uploaded_hash = nil
           begin
@@ -24,7 +26,7 @@ module Consul
               config.logger.info "Session lock acquired..."
               begin
                 uploaded_hash = runner.run(uploaded_hash) || uploaded_hash
-                sleep 5
+                sleep cycle_sleep
               rescue Interrupt
                 raise # Re-raise to break this rescue block
               rescue ConsulSessionExpired
@@ -33,7 +35,7 @@ module Consul
               rescue Exception => e
                 config.logger.error "An error occurred while updating template: #{e.message}"
                 config.logger.debug "Sleeping before attempting to update again..."
-                sleep 5
+                sleep lock_sleep
                 break
               end until false
             end
@@ -44,7 +46,7 @@ module Consul
             config.logger.info "Unable to obtain session lock: #{e.message}"
             config.logger.debug "Sleeping before attempting lock session again..."
             begin
-              sleep 5
+              sleep lock_sleep
             rescue Interrupt
               config.logger.error "Received interrupt signal, exiting..."
               break
