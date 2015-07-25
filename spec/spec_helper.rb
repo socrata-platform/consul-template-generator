@@ -30,6 +30,10 @@ class ConsulApiRack
     case env['PATH_INFO']
     when /\/v1\/session\/create/
       code, ret = 200, "{\"ID\": \"test-session-id\"}"
+    when /\/v1\/session\/destroy\/failed-destroyed-session/
+      code, ret = 500, 'false'
+    when /\/v1\/session\/destroy/
+      code, ret = 200, 'true'
     when /\/v1\/kv\/lock\//
       code, ret = process_lock(env['QUERY_STRING'])
     when /\/v1\/kv\//

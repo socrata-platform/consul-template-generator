@@ -51,6 +51,8 @@ module Consul
               config.logger.error "Received interrupt signal, exiting..."
               break
             end
+          ensure
+            runner.destroy_session
           end until false
           0
         end
