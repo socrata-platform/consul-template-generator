@@ -52,11 +52,13 @@ module Consul
         def renew_session(sess_id)
           # There is an outstanding bug in Diplomat::Session.renew with a PR to fix
           # https://github.com/WeAreFarmGeek/diplomat/issues/43
-          # Until it's merged and release, we have to skip renewing sessions...
           begin
-            #Diplomat::Session.renew sess_id
+            Diplomat::Session.renew sess_id
           rescue Faraday::ResourceNotFound
             raise ConsulSessionExpired
+          rescue Exception => e
+            # Letting this go for the time being, until the above issue is fixed
+            self.config.logger.error "Unknown error occoured: #{e.message}"
           end
         end
 
