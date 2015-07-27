@@ -10,18 +10,18 @@ include Consul::Template::Generator
 describe 'Consul::Template::Generator::CTRunner' '#acquire_lock' do
   before do
     Consul::Template::Generator.configure do |config|
-      config.template = 'test-template.ctmpl'
-      config.template_key = '/test-template'
+      config.templates = { 'test-template.ctmpl' => '/test-template' }
       config.consul_host = '127.0.0.1:8500'
       config.consul_template_binary = 'consul-template'
       config.log_level = :off
     end
+    @config = Consul::Template::Generator.config
   end
 
   context 'acquires lock' do
     it 'clean lock acquisition' do
       runner = CTRunner.new('test-session')
-      runner.acquire_lock do
+      runner.acquire_lock @config.templates['test-template.ctmpl'] do
        expect(true).to be_truthy ## This is simply to assert we are able to execute code in the block
       end
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/kv/lock/test-template').with(:query => {:acquire => 'test-session'})
@@ -30,7 +30,7 @@ describe 'Consul::Template::Generator::CTRunner' '#acquire_lock' do
 
     it 'handles being unable to acquire lock' do
       runner = CTRunner.new('test-session-lock-fail')
-      expect { runner.acquire_lock { puts 'hi' } }.to raise_error(KeyNotLockedError)
+      expect { runner.acquire_lock @config.templates['test-template.ctmpl'] { puts 'hi' } }.to raise_error(KeyNotLockedError)
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/kv/lock/test-template').with(:query => {:acquire => 'test-session-lock-fail'})
       expect(WebMock).to_not have_requested(:put, 'http://127.0.0.1:8500/v1/kv/lock/test-template').with(:query => {:release => 'test-session-lock-fail'})
     end
@@ -40,8 +40,8 @@ end
 describe 'Consul::Template::Generator::CTRunner' '#acquire_session_lock' do
   before do
     Consul::Template::Generator.configure do |config|
-      config.template = 'test-template.ctmpl'
-      config.template_key = '/test-template'
+      config.templates = { 'test-template.ctmpl' => '/test-template' }
+      config.session_key = '/session/test-template'
       config.consul_host = '127.0.0.1:8500'
       config.consul_template_binary = 'consul-template'
       config.log_level = :off
@@ -71,17 +71,17 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
   context 'uploads template' do
     before do
       Consul::Template::Generator.configure do |config|
-        config.template = 'test-template.ctmpl'
-        config.template_key = '/test-template'
+        config.templates = { 'test-template.ctmpl' => '/test-template' }
         config.consul_host = '127.0.0.1:8500'
         config.consul_template_binary = 'consul-template'
         config.log_level = :off
       end
+      @config = Consul::Template::Generator.config
     end
 
     it 'does a clean upload' do
       runner = CTRunner.new('test-session')
-      success = runner.upload_template('this is a test')
+      success = runner.upload_template(@config.templates['test-template.ctmpl'], 'this is a test')
       expect(success).to be_truthy
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/kv/test-template').with(:body => 'this is a test')
     end
@@ -90,17 +90,17 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
   context 'handles template upload failure' do
     before do
       Consul::Template::Generator.configure do |config|
-        config.template = 'test-template.ctmpl'
-        config.template_key = '/test-template-failure'
+        config.templates = { 'test-template.ctmpl' => '/test-template-failure' }
         config.consul_host = '127.0.0.1:8500'
         config.consul_template_binary = 'consul-template'
         config.log_level = :off
       end
+      @config = Consul::Template::Generator.config
     end
 
     it 'does a clean upload' do
       runner = CTRunner.new('test-session')
-      expect { runner.upload_template('this is a fail test') }.to raise_error(TemplateUploadError)
+      expect { runner.upload_template(@config.templates['test-template.ctmpl'], 'this is a fail test') }.to raise_error(TemplateUploadError)
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/kv/test-template-failure').with(:body => 'this is a fail test')
     end
   end

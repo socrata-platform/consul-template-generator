@@ -4,11 +4,11 @@ module Consul
   module Template
     module Generator
       class CTRunner
-        def run(comp_hash = nil)
+        def run(template, template_key, comp_hash = nil)
           status, body, hash, uploaded_hash = nil, nil, nil, nil
-          acquire_lock do
-            @config.logger.debug "Attempting to render template: #{@config.template}"
-            status, body, hash = render_template
+          acquire_lock template_key do
+            @config.logger.debug "Attempting to render template: #{template}"
+            status, body, hash = render_template template
             unless status == 0
               raise TemplateRenderError, "consul-template exited with on-zero exit status"
             end
@@ -17,9 +17,9 @@ module Consul
             end
             @config.logger.debug "Template rendered..."
             if comp_hash.nil? || comp_hash != hash
-              @config.logger.info "Change in template discovered, attempting to upload to key #{@config.template_key}"
+              @config.logger.info "Change in template discovered, attempting to upload to key #{template_key}"
               @config.logger.debug "Existing hash: #{comp_hash || 'nil'}, new hash: #{hash}"
-              uploaded = upload_template(body)
+              uploaded = upload_template(template_key, body)
               if uploaded
                 @config.logger.info "New template uploaded..."
                 uploaded_hash = hash

@@ -6,11 +6,11 @@ module Consul
       module CMD
         include Consul::Template::Generator
 
-        def self.configure(consul_host, template, template_key, log_level, proxy = nil)
+        def self.configure(consul_host, templates, session_key, log_level, proxy = nil)
           Consul::Template::Generator.configure do |config|
             config.log_level = log_level
-            config.template = template
-            config.template_key = template_key
+            config.templates = templates
+            config.session_key = session_key
             config.consul_host = consul_host
           end
         end
@@ -19,14 +19,16 @@ module Consul
           cycle_sleep ||= 0.5
           lock_sleep ||= 1.0
           config = Consul::Template::Generator.config
-          uploaded_hash = nil
+          uploaded_hashes = {}
           begin
             runner = CTRunner.new
             runner.acquire_session_lock do
               config.logger.info "Session lock acquired..."
               begin
-                uploaded_hash = runner.run(uploaded_hash) || uploaded_hash
-                sleep cycle_sleep
+                config.templates.each do |template,template_key|
+                  uploaded_hashes[template] = runner.run(template, template_key, uploaded_hashes[template]) || uploaded_hashes[template]
+                  sleep cycle_sleep
+                end
               rescue Interrupt
                 raise # Re-raise to break this rescue block
               rescue ConsulSessionExpired
@@ -60,8 +62,10 @@ module Consul
         def self.run_once
           config = Consul::Template::Generator.config
           begin
-            runner = CTRunner.new
-            result = runner.run
+            config.templates.each do |template,template_key|
+              runner = CTRunner.new
+              result = runner.run template, template_key
+            end
           rescue Exception => e
             config.logger.error "An unexpected error occurred, unable to process template: #{e.message}"
             1

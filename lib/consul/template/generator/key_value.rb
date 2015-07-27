@@ -5,8 +5,8 @@ module Consul
     module Generator
       class CTRunner
 
-        def acquire_lock(lock_key = nil)
-          lock_key ||= @config.lock_key
+        def acquire_lock(target_key)
+          lock_key = @config.lock_key target_key
           @config.logger.debug "Attempting to acquire lock on key: #{lock_key}"
           Consul::Template::Generator.renew_session @session
           unless Diplomat::Lock.acquire(lock_key, @session)
@@ -27,10 +27,10 @@ module Consul
           end
         end
 
-        def upload_template(raw_template)
-          @config.logger.info "Uploading key: #{@config.template_key}"
+        def upload_template(template_key, raw_template)
+          @config.logger.info "Uploading key: #{template_key}"
           begin
-            Diplomat::Kv.put(@config.template_key, raw_template)
+            Diplomat::Kv.put(template_key, raw_template)
           rescue Exception => e
             raise TemplateUploadError, "Encountered an unexpected error while uploading template: #{e.message}"
           end

@@ -5,7 +5,7 @@ require 'consul/template/generator/cmd'
 include Consul::Template::Generator
 
 def verify_opts(opts)
-  !opts[:key].nil? && !opts[:template].nil?
+  !(opts[:templates].empty? || opts[:templates].any? { |k,v| v.nil? })
 end
 
 
@@ -26,14 +26,14 @@ EOC
     options[:consul] = h
   end
 
-  options[:template] = nil
-  opts.on('-t TEMPLATE', '--template TEMPLATE', 'Consul-Template ctmpl file to monitor (required)') do |t|
-    options[:template] = t
+  options[:templates] = {}
+  opts.on('-t TEMPLATES', '--templates TEMPLATES', 'Comma separated list of consul-template ctmpl file and keys to monitor, tmple.ctmpl:tmple-key,tmple2.ctmpl:templ-key2  (required)') do |t|
+    options[:templates] = Hash[t.split(',').collect { |v| v.split(':') } ]
   end
 
-  options[:key] = nil
-  opts.on('-k KEY', '--key KEY', 'Key to store rendered template in (required)') do |k|
-    options[:key] = k
+  options[:session_key] = 'consul-template-generator'
+  opts.on('-s SESSION_KEY', '--session-key SESSION_KEY', 'Key used to lock template generation session [default: consul-template-generator') do |l|
+    options[:session_key] = l
   end
 
   options[:proxy] = nil
@@ -64,8 +64,9 @@ end
 
 opt_parser.parse!
 
+
 unless verify_opts(options)
-  STDOUT.puts "Both '--key' and '--template' must be provided"
+  STDOUT.puts "'--templates' must be provided with <template>:<key> pairs\n\n"
   puts opt_parser
   exit(1)
 end
@@ -74,7 +75,7 @@ if options[:unset_proxy]
   ENV['http_proxy'] = nil
 end
 
-CMD.configure(options[:consul], options[:template], options[:key], options[:log_level], options[:proxy])
+CMD.configure(options[:consul], options[:templates], options[:session_key], options[:log_level], options[:proxy])
 
 ec = 1
 cmd = ARGV[0]
