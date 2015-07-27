@@ -24,8 +24,7 @@ end
 describe 'Consul::Template::Generator::CTRunner' '#render_template' do
   before do
     Consul::Template::Generator.configure do |config|
-      config.template = '/etc/test-template.ctmpl'
-      config.template_key = '/test-template'
+      config.templates = {'/etc/test-template.ctmpl' => '/test-template'}
       config.consul_template_binary = 'consul-template'
     end
   end
@@ -36,7 +35,7 @@ describe 'Consul::Template::Generator::CTRunner' '#render_template' do
       exp_hash = '54b0c58c7ce9f2a8b551351102ee0938'
       setup_open4(exp_out, 0, 101)
       runner = CTRunner.new('test-session')
-      exit_code, body, hash = runner.render_template
+      exit_code, body, hash = runner.render_template Consul::Template::Generator.config.templates['/etc/test-template.ctmpl']
       expect(body).to eql(exp_out)
       expect(hash).to eql(exp_hash)
       expect(exit_code).to eql(@status)

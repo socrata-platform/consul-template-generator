@@ -8,8 +8,7 @@ include Consul::Template::Generator
 describe 'Consul::Template::Generator::CTRunner' '#initialize' do
   before(:each) do
     Consul::Template::Generator.configure do |config|
-      config.template = 'test-session-template.ctmpl'
-      config.template_key = 'test-session-template'
+      config.templates = {'test-session-template.ctmpl' => 'test-session-template' }
       config.node = 'test-node'
       config.log_level = :off
       config.consul_template_binary = 'consul-template'

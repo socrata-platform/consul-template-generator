@@ -39,25 +39,25 @@ module Consul
       end
 
       class Configuration
-        attr_accessor :template, :template_key, :consul_template_binary, :logger, :log_level
+        attr_accessor :templates, :session_key, :consul_template_binary, :logger, :log_level
         attr_accessor :consul_host, :node, :client_options
 
         def initialize
           @log_level = :debug
           @node = nil
           @consul_host = nil
-          @template = nil
-          @template_key = nil
+          @templates = {}
+          @session_key = 'consul-template-generator'
           @client_options = {}
           @logger = Consul::Template::Generator::STDLogger
         end
 
-        def lock_key
-          "/lock/#{@template_key.sub(/^\//, '')}"
+        def lock_key(key)
+          "/lock/#{key.sub(/^\//, '')}"
         end
 
         def session_lock_key
-          "/lock/session/#{@template_key.sub(/^\//, '')}"
+          @session_key
         end
       end
     end

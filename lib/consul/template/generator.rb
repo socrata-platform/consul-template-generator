@@ -31,12 +31,8 @@ module Consul
             self.config.consul_template_binary = ct_binary
           end
 
-          if self.config.template.nil?
+          if self.config.templates.empty? || self.config.templates.any? { |k,v| v.nil? }
             raise "template must be defined in configuration"
-          end
-
-          if self.config.template_key.nil?
-            raise "template_key must be defined in configuration"
           end
 
           Diplomat.configure do |config|
