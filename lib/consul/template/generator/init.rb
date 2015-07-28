@@ -4,8 +4,8 @@ module Consul
       class CTRunner
         attr_accessor :session
 
-        def initialize(consul_session_id = nil)
-          if consul_session_id.nil?
+        def initialize(consul_session_id = nil, do_create_session = true)
+          if (consul_session_id.nil? && do_create_session)
             create_session
           else
             @session = consul_session_id
@@ -17,7 +17,7 @@ module Consul
           unless @session.nil?
             destroy_session
           end
-            @session = Consul::Template::Generator.create_session 'consul-template-generator'
+          @session = Consul::Template::Generator.create_session 'consul-template-generator'
         end
 
         def destroy_session
