@@ -20,7 +20,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       runner = Consul::Template::Generator::CTRunner.new
       expect(runner.session).to eql('test-session-id')
       runner.destroy_session
-      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator"}')
+      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator","Behavior":"release"}')
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/test-session-id')
       expect(runner.session).to be_nil
     end
@@ -30,7 +30,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       expect(runner.session).to eql('destroyed-session')
       runner.create_session
       runner.destroy_session
-      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator"}')
+      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator","Behavior":"release"}')
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/destroyed-session')
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/test-session-id')
       expect(runner.session).to be_nil
@@ -40,7 +40,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       runner = Consul::Template::Generator::CTRunner.new 'failed-destroyed-session'
       expect(runner.session).to eql('failed-destroyed-session')
       runner.create_session
-      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator"}')
+      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator","Behavior":"release"}')
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/failed-destroyed-session')
       expect(runner.session).to eql('test-session-id')
     end

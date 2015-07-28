@@ -42,7 +42,7 @@ module Consul
         end
 
         def create_session(name)
-          Diplomat::Session.create({:Node => self.config.node, :Name => name})
+          Diplomat::Session.create({:Node => self.config.node, :Name => name, :Behavior => 'release'})
         end
 
         def renew_session(sess_id)
@@ -54,7 +54,7 @@ module Consul
             raise ConsulSessionExpired
           rescue Exception => e
             # Letting this go for the time being, until the above issue is fixed
-            self.config.logger.error "Unknown error occoured: #{e.message}"
+            self.config.logger.error "Unknown error occurred: #{e.message}"
           end
         end
 
