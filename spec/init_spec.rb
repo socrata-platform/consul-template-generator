@@ -11,6 +11,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       config.templates = {'test-session-template.ctmpl' => 'test-session-template' }
       config.node = 'test-node'
       config.log_level = :off
+      config.session_key = '/session/consul-template-generator'
       config.consul_template_binary = 'consul-template'
     end
   end
@@ -41,7 +42,7 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       expect(runner.session).to eql('failed-destroyed-session')
       runner.create_session
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator","Behavior":"release"}')
-      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/failed-destroyed-session')
+      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/failed-destroyed-session').times(5)
       expect(runner.session).to eql('test-session-id')
     end
   end
