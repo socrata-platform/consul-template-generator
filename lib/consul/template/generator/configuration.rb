@@ -59,6 +59,10 @@ module Consul
         def session_lock_key
           @session_key
         end
+
+        def session_name
+          @session_key.split('/')[-1]
+        end
       end
     end
   end

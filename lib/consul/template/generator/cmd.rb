@@ -17,7 +17,7 @@ module Consul
             @config = Consul::Template::Generator.config
           end
 
-          def signals
+          def configure_signal_handlers
             Signal.trap("INT") do
               @config.logger.error "Received INT signal..."
               @interrupted = true
@@ -30,7 +30,7 @@ module Consul
           end
 
           def run(cycle_sleep = nil, lock_sleep = nil)
-            signals
+            configure_signal_handlers
             @terminated = false
             cycle_sleep ||= 0.5
             lock_sleep ||= 1.0

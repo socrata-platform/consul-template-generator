@@ -59,7 +59,7 @@ module Consul
         end
 
         def destroy_session(sess_id)
-          Diplomat::Session.destroy sess_id
+          'true' == Diplomat::Session.destroy(sess_id)
         end
       end
     end
