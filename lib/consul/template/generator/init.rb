@@ -21,6 +21,7 @@ module Consul
         end
 
         def destroy_session
+          return if @session.nil?
           attempts = 0
           begin
             destroyed = Consul::Template::Generator.destroy_session @session
@@ -32,7 +33,7 @@ module Consul
               attempts += 1
               sleep 0.25
             end
-          end until (destroyed || attempts > 4)
+          end until (@session.nil? || attempts > 4)
         end
       end
     end

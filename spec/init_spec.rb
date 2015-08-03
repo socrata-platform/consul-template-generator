@@ -37,13 +37,21 @@ describe 'Consul::Template::Generator::CTRunner' '#initialize' do
       expect(runner.session).to be_nil
     end
 
-    it "handles filed session destroys" do
+    it "handles failed session destroys" do
       runner = Consul::Template::Generator::CTRunner.new 'failed-destroyed-session'
       expect(runner.session).to eql('failed-destroyed-session')
       runner.create_session
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/create').with(:body => '{"Node":"test-node","Name":"consul-template-generator","Behavior":"release"}')
       expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/failed-destroyed-session').times(5)
       expect(runner.session).to eql('test-session-id')
+    end
+
+    it "handles trying to destroy nil sessions" do
+      runner = Consul::Template::Generator::CTRunner.new 'nil-session'
+      runner.session = nil
+      expect(runner.session).to be_nil
+      runner.destroy_session
+      expect(WebMock).to have_requested(:put, 'http://127.0.0.1:8500/v1/session/destroy/').times(0)
     end
   end
 end
