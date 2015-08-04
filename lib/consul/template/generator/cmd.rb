@@ -7,12 +7,14 @@ module Consul
         include Consul::Template::Generator
         class << self
 
-          def configure(consul_host, templates, session_key, log_level, proxy = nil)
+          def configure(consul_host, templates, session_key, log_level, graphite_host = nil, graphite_paths = nil)
             Consul::Template::Generator.configure do |config|
               config.log_level = log_level
               config.templates = templates
               config.session_key = session_key
               config.consul_host = consul_host
+              config.graphite_host = graphite_host
+              config.graphite_paths = graphite_paths || {}
             end
             @config = Consul::Template::Generator.config
           end
@@ -20,6 +22,7 @@ module Consul
           def configure_signal_handlers
             Signal.trap("INT") do
               @config.logger.error "Received INT signal..."
+              @terminated = true
               @interrupted = true
             end
             Signal.trap("TERM") do
@@ -43,7 +46,13 @@ module Consul
                 @config.logger.info "Session lock acquired..."
                 begin
                   @config.templates.each do |template,template_key|
-                    uploaded_hashes[template] = runner.run(template, template_key, uploaded_hashes[template]) || uploaded_hashes[template]
+                    new_hash = runner.run(template, template_key, uploaded_hashes[template])
+                    unless new_hash.nil?
+                      uploaded_hashes[template] =  new_hash
+                      if @config.graphite_paths.include? template
+                        runner.post_graphite_event @config.graphite_paths[template]
+                      end
+                    end
                     sleep cycle_sleep
                   end
                 rescue ConsulSessionExpired
@@ -70,7 +79,12 @@ module Consul
             begin
               @config.templates.each do |template,template_key|
                 runner = CTRunner.new
-                result = runner.run template, template_key
+                result = runner.run(template, template_key)
+                unless result.nil?
+                  if @config.graphite_paths.include? template
+                    runner.post_graphite_event @config.graphite_paths[template]
+                  end
+                end
               end
             rescue Exception => e
               @config.logger.error "An unexpected error occurred, unable to process template: #{e.message}"
