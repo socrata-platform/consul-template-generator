@@ -5,9 +5,28 @@ require 'consul/template/generator/cmd'
 include Consul::Template::Generator
 
 def verify_opts(opts)
-  !(opts[:templates].empty? || opts[:templates].any? { |k,v| v.nil? })
+  templates_supplied = !(opts[:templates].empty? || opts[:templates].any? { |k,v| v.nil? })
+  return false unless templates_supplied
+  unless opts[:graphite_host].nil?
+    return false if opts[:graphite_paths].empty?
+  end
+  templates_supplied
 end
 
+def process_templates(t_string)
+  Hash[t_string.split(',').collect do |tmpl|
+    parts = tmpl.split(':')
+    [parts[0], parts[1]]
+  end]
+end
+
+def process_graphite_paths(t_string)
+  return {} if t_string.split(',')[0].split(':').length < 3
+  Hash[t_string.split(',').collect do |tmpl|
+    parts = tmpl.split(':')
+    [parts[0], parts[2]]
+  end]
+end
 
 options = {}
 opt_parser = OptionParser.new do |opts|
@@ -27,18 +46,20 @@ EOC
   end
 
   options[:templates] = {}
-  opts.on('-t TEMPLATES', '--templates TEMPLATES', 'Comma separated list of consul-template ctmpl file and keys to monitor, tmple.ctmpl:tmple-key,tmple2.ctmpl:templ-key2  (required)') do |t|
-    options[:templates] = Hash[t.split(',').collect { |v| v.split(':') } ]
+  options[:graphite_paths] = {}
+  opts.on('-t TEMPLATES',
+          '--templates TEMPLATES',
+          'Comma separated list of consul-template ctmpl file and keys to monitor, tmple.ctmpl:tmple-key,tmple2.ctmpl:templ-key2  (required)',
+          'If \'--graphite-host\' is supplied, target graphite path must also be supplied, e.g.',
+          '    tmple.ctmpl:tmple-key:consul.template.HOSTNAME.<template name>,tmple2.ctmpl:tmple-key2:consul.template.HOSTNAME.<template name>',
+          'where \'HOSTNAME\' will be replaced as one might expect.') do |t|
+    options[:templates] = process_templates(t)
+    options[:graphite_paths] = process_graphite_paths(t)
   end
 
   options[:session_key] = 'consul-template-generator'
   opts.on('-s SESSION_KEY', '--session-key SESSION_KEY', 'Key used to lock template generation session [default: consul-template-generator') do |l|
     options[:session_key] = l
-  end
-
-  options[:proxy] = nil
-  opts.on('-p PROXY_URL', '--proxy PROXY_URL', 'Proxy URL if required (e.g. http://proxy.example.com:3128)') do |p|
-    options[:proxy] = p
   end
 
   options[:unset_proxy] = false
@@ -60,13 +81,27 @@ EOC
   opts.on(nil, '--lock-sleep LOCK_SLEEP', "Sleep interval in seconds between each attempt to obtain a session lock [default: 1.0]") do |s|
     options[:cycle_sleep] = s.to_f
   end
+
+  options[:graphite_host] = nil
+  opts.on('-g GRAPHITE_HOST', '--graphite-host GRAPHITE_HOST', "Graphite host to post template update events to (optional)") do |g|
+    if g.split(':').length != 2
+      STDERR.puts "GRAPHITE_HOST must be defined as <host>:<port> pair\n\n"
+      puts opt_parser
+      exit(1)
+    end
+    options[:graphite_host] = g
+  end
 end
 
+opt_parser.version = VERSION
 opt_parser.parse!
 
-
 unless verify_opts(options)
-  STDOUT.puts "'--templates' must be provided with <template>:<key> pairs\n\n"
+  if options[:graphite_host].nil?
+    STDERR.puts "'--templates' must be provided with <template>:<key> pairs\n\n"
+  else
+    STDERR.puts "'--templates' must be provided with <template>:<key>:<graphite path> triplets\n\n"
+  end
   puts opt_parser
   exit(1)
 end
@@ -75,7 +110,7 @@ if options[:unset_proxy]
   ENV['http_proxy'] = nil
 end
 
-CMD.configure(options[:consul], options[:templates], options[:session_key], options[:log_level], options[:proxy])
+CMD.configure(options[:consul], options[:templates], options[:session_key], options[:log_level], options[:graphite_host], options[:graphite_paths])
 
 ec = 1
 cmd = ARGV[0]

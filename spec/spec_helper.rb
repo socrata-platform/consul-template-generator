@@ -101,7 +101,7 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::HTMLFormatter,
   SimpleCov::Formatter::Console
 ]
-SimpleCov.minimum_coverage(85)
+SimpleCov.minimum_coverage(80)
 SimpleCov.start
 
 def capture_stdout(&block)
