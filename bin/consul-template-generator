@@ -67,6 +67,11 @@ EOC
     options[:unset_proxy] = true
   end
 
+  options[:diff_changes] = false
+  opts.on(nil, '--diff-changes', "Print diff'ed template prior to upload") do |u|
+    options[:diff_changes] = true
+  end
+
   options[:log_level] = :info
   opts.on('-l LOG_LEVEL', '--log-level LOG_LEVEL', "Log level, options are 'debug', 'info', 'error' [default: info]") do |l|
     options[:log_level] = l.to_sym
@@ -110,7 +115,15 @@ if options[:unset_proxy]
   ENV['http_proxy'] = nil
 end
 
-CMD.configure(options[:consul], options[:templates], options[:session_key], options[:log_level], options[:graphite_host], options[:graphite_paths])
+CMD.configure(
+    options[:consul],
+    options[:templates],
+    options[:session_key],
+    options[:log_level],
+    options[:graphite_host],
+    options[:graphite_paths],
+    options[:diff_changes],
+)
 
 ec = 1
 cmd = ARGV[0]
