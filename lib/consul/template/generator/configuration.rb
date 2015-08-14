@@ -39,7 +39,7 @@ module Consul
       end
 
       class Configuration
-        attr_accessor :templates, :session_key, :consul_template_binary, :logger, :log_level, :graphite_host, :graphite_paths
+        attr_accessor :templates, :session_key, :consul_template_binary, :logger, :log_level, :graphite_host, :graphite_paths, :diff_changes
         attr_accessor :consul_host, :node, :client_options
 
         def initialize
@@ -52,6 +52,7 @@ module Consul
           @client_options = {}
           @logger = Consul::Template::Generator::STDLogger
           @graphite_host = nil
+          @diff_changes = false
         end
 
         def lock_key(key)

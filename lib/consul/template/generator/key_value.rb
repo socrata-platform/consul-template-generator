@@ -35,6 +35,15 @@ module Consul
             raise TemplateUploadError, "Encountered an unexpected error while uploading template: #{e.message}"
           end
         end
+
+        def retrieve_template(template_key)
+          @config.logger.info "Downloading key: #{template_key}"
+          begin
+            Diplomat::Kv.get(template_key, nil, :return, :return)
+          rescue Exception => e
+            raise TemplateUploadError, "Encountered an unexpected error while uploading template: #{e.message}"
+          end
+        end
       end
     end
   end

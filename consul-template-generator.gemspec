@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov-console', '~> 0.2'
   spec.add_development_dependency 'webmock', '~> 1.21'
   spec.add_development_dependency 'rack', '~> 1.6'
-  spec.add_dependency 'diplomat', '~> 0.12.0'
-  spec.add_dependency 'popen4', '~> 0.1.2'
+  spec.add_dependency 'diffy', '~> 3.0'
+  spec.add_dependency 'diplomat', '~> 0.13'
+  spec.add_dependency 'popen4', '~> 0.1'
 end
