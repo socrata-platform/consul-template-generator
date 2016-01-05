@@ -22,10 +22,10 @@ module Consul
               @config.logger.debug "Existing hash: #{comp_hash || 'nil'}, new hash: #{hash}"
 
               if diff_changes
-                  @config.logger.info "Diffing templates..."
-                  curr_template = retrieve_template template_key
-                  diff = Diffy::Diff.new(curr_template, body, :include_diff_info => true, :context => 5).to_s(:text)
-                  @config.logger.info diff
+                @config.logger.info "Diffing templates..."
+                curr_template = retrieve_template template_key
+                diff = Diffy::Diff.new(curr_template, body, :include_diff_info => true, :context => 5).to_s(:text)
+                @config.logger.info diff
               end
 
               uploaded = upload_template(template_key, body)

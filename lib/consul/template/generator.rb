@@ -42,8 +42,14 @@ module Consul
           end
         end
 
-        def create_session(name)
-          Diplomat::Session.create({:Node => self.config.node, :Name => name, :Behavior => 'release'})
+        def create_session(name, ttl_seconds = 30)
+          opts = {
+            :Node => self.config.node,
+            :Name => name,
+            :Behavior => 'release',
+            :TTL => "#{ttl_seconds}s"
+          }
+          Diplomat::Session.create(opts)
         end
 
         def renew_session(sess_id)

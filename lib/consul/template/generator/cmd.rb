@@ -7,11 +7,12 @@ module Consul
         include Consul::Template::Generator
         class << self
 
-          def configure(consul_host, templates, session_key, log_level, graphite_host = nil, graphite_paths = nil, diff_changes = false)
+          def configure(consul_host, templates, session_key, log_level, graphite_host = nil, graphite_paths = nil, diff_changes = false, session_ttl = nil)
             Consul::Template::Generator.configure do |config|
               config.log_level = log_level
               config.templates = templates
               config.session_key = session_key
+              config.session_ttl = session_ttl || 30
               config.consul_host = consul_host
               config.graphite_host = graphite_host
               config.graphite_paths = graphite_paths || {}
