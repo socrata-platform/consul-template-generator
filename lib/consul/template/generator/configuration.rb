@@ -39,8 +39,8 @@ module Consul
       end
 
       class Configuration
-        attr_accessor :templates, :session_key, :consul_template_binary, :logger, :log_level, :graphite_host, :graphite_paths, :diff_changes
-        attr_accessor :consul_host, :node, :client_options
+        attr_accessor :templates, :session_key, :session_ttl, :consul_template_binary, :logger, :log_level, :graphite_host
+        attr_accessor :consul_host, :node, :client_options, :diff_changes, :graphite_paths
 
         def initialize
           @log_level = :debug
@@ -49,6 +49,7 @@ module Consul
           @templates = {}
           @graphite_paths = {}
           @session_key = 'consul-template-generator'
+          @session_ttl = 30
           @client_options = {}
           @logger = Consul::Template::Generator::STDLogger
           @graphite_host = nil

@@ -17,7 +17,7 @@ module Consul
           unless @session.nil?
             destroy_session
           end
-          @session = Consul::Template::Generator.create_session @config.session_name
+          @session = Consul::Template::Generator.create_session @config.session_name, @config.session_ttl
         end
 
         def destroy_session

@@ -62,6 +62,11 @@ EOC
     options[:session_key] = l
   end
 
+  options[:session_ttl] = 30
+  opts.on(nil, '--session-ttl SESSION_TTL', "Set a TTL for consul sessions (sets an implicit ttl on locks created by consul-template-generator [default: 30]") do |ttl|
+    options[:session_ttl] = ttl.to_i
+  end
+
   options[:unset_proxy] = false
   opts.on(nil, '--unset-proxy', "Use if 'http_proxy' is set in your environment, but you don't want to use it...") do |u|
     options[:unset_proxy] = true
@@ -123,6 +128,7 @@ CMD.configure(
     options[:graphite_host],
     options[:graphite_paths],
     options[:diff_changes],
+    options[:session_ttl]
 )
 
 ec = 1
