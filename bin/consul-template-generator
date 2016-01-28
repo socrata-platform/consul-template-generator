@@ -51,19 +51,18 @@ EOC
           '--templates TEMPLATES',
           'Comma separated list of consul-template ctmpl file and keys to monitor, tmple.ctmpl:tmple-key,tmple2.ctmpl:templ-key2  (required)',
           'If \'--graphite-host\' is supplied, target graphite path must also be supplied, e.g.',
-          '    tmple.ctmpl:tmple-key:consul.template.HOSTNAME.<template name>,tmple2.ctmpl:tmple-key2:consul.template.HOSTNAME.<template name>',
-          'where \'HOSTNAME\' will be replaced as one might expect.') do |t|
+          '    tmple.ctmpl:tmple-key:consul.template.HOSTNAME.<template name>,tmple2.ctmpl:tmple-key2:consul.template.<HOSTNAME>.<template name>') do |t|
     options[:templates] = process_templates(t)
     options[:graphite_paths] = process_graphite_paths(t)
   end
 
   options[:session_key] = 'consul-template-generator'
-  opts.on('-s SESSION_KEY', '--session-key SESSION_KEY', 'Key used to lock template generation session [default: consul-template-generator') do |l|
+  opts.on('-s SESSION_KEY', '--session-key SESSION_KEY', 'Key used to lock template generation session [default: consul-template-generator]') do |l|
     options[:session_key] = l
   end
 
   options[:session_ttl] = 30
-  opts.on(nil, '--session-ttl SESSION_TTL', "Set a TTL for consul sessions (sets an implicit ttl on locks created by consul-template-generator [default: 30]") do |ttl|
+  opts.on(nil, '--session-ttl SESSION_TTL', "Set a TTL for consul sessions (sets an implicit ttl on locks created by consul-template-generator [default: 30s])") do |ttl|
     options[:session_ttl] = ttl.to_i
   end
 
