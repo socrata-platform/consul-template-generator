@@ -13,12 +13,12 @@ also be avoided by the use of `consul-template-generator`
 The function of `consul-template-generator` is to delegate template generation to a single process
 in a fault-tolerant fashion.  The `consul-template-generator` "master" takes a consul lock on a
 specified session K/V store key to allow redundant deployments of any given configuration to be
-active simultaneously.  A given `consul-template-generator` configuration can include arbitrary
-number `ctmpl` files which will be evaluated using `conssul-template`.  When updates to a `ctmpl`
+active simultaneously.  A given `consul-template-generator` configuration can include an arbitrary
+number `ctmpl` files which will be evaluated using `consul-template`.  When updates to a `ctmpl`
 are found `consul-template-generator` will update specified keys in Consul's K/V store with the
 `consul-template` rendered templates.  This allows downstream instances of `consul-template` to
-watch a single key in Consul K/V instead of multiple Consul registered services, reducing the load
-on the underlying Consul cluster by (potentially) orders of magnitude.
+watch a single key in Consul K/V instead of multiple Consul registered services, thus reducing
+the load on the underlying Consul cluster significantly.
 
 
 ## Usage
