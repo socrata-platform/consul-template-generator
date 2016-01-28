@@ -54,6 +54,9 @@ module Consul
           @logger = Consul::Template::Generator::STDLogger
           @graphite_host = nil
           @diff_changes = false
+
+          STDOUT.sync = true
+          STDERR.sync = true
         end
 
         def lock_key(key)
