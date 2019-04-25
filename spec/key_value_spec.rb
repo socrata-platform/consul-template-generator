@@ -10,7 +10,7 @@ include Consul::Template::Generator
 describe 'Consul::Template::Generator::CTRunner' '#acquire_lock' do
   before do
     Consul::Template::Generator.configure do |config|
-      config.templates = { 'test-template.ctmpl' => '/test-template' }
+      config.templates = { 'test-template.ctmpl' => 'test-template' }
       config.consul_host = '127.0.0.1:8500'
       config.consul_template_binary = 'consul-template'
       config.log_level = :off
@@ -40,7 +40,7 @@ end
 describe 'Consul::Template::Generator::CTRunner' '#acquire_session_lock' do
   before do
     Consul::Template::Generator.configure do |config|
-      config.templates = { 'test-template.ctmpl' => '/test-template' }
+      config.templates = { 'test-template.ctmpl' => 'test-template' }
       config.session_key = '/session/test-template'
       config.consul_host = '127.0.0.1:8500'
       config.consul_template_binary = 'consul-template'
@@ -71,7 +71,7 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
   context 'uploads template' do
     before do
       Consul::Template::Generator.configure do |config|
-        config.templates = { 'test-template.ctmpl' => '/test-template' }
+        config.templates = { 'test-template.ctmpl' => 'test-template' }
         config.consul_host = '127.0.0.1:8500'
         config.consul_template_binary = 'consul-template'
         config.log_level = :off
@@ -90,7 +90,7 @@ describe 'Consul::Template::Generator::CTRunner' '#upload_template' do
   context 'handles template upload failure' do
     before do
       Consul::Template::Generator.configure do |config|
-        config.templates = { 'test-template.ctmpl' => '/test-template-failure' }
+        config.templates = { 'test-template.ctmpl' => 'test-template-failure' }
         config.consul_host = '127.0.0.1:8500'
         config.consul_template_binary = 'consul-template'
         config.log_level = :off
