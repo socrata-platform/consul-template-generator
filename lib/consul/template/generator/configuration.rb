@@ -60,7 +60,7 @@ module Consul
         end
 
         def lock_key(key)
-          "/lock/#{key.sub(/^\//, '')}"
+          "lock/#{key.sub(/^\//, '')}"
         end
 
         def session_lock_key
